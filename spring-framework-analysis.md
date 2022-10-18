@@ -42,3 +42,6 @@ What’s New, Upgrade Notes, Supported Versions, and other cross-version informa
 根据官方文档中
 The Spring Framework is divided into modules. Applications can choose which modules they need. At the heart are the modules of the core container, including a configuration model and a dependency injection mechanism.
 Spring框架分为多个模块。应用程序可以选择所需的模块。核心是核心容器的模块，包括配置模型和依赖注入机制。
+
+而在Spring框架核心中，IOC控制反转容器最重要。
+Foremost amongst these is the Spring Framework’s Inversion of Control (IoC) container. A thorough treatment of the Spring Framework’s IoC container is closely followed by comprehensive coverage of Spring’s Aspect-Oriented Programming (AOP) technologies. 
