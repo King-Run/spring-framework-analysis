@@ -1,38 +1,198 @@
-# <img src="src/docs/spring-framework.png" width="80" height="80"> Spring Framework [![Build Status](https://ci.spring.io/api/v1/teams/spring-framework/pipelines/spring-framework-5.3.x/jobs/build/badge)](https://ci.spring.io/teams/spring-framework/pipelines/spring-framework-5.3.x?groups=Build") [![Revved up by Gradle Enterprise](https://img.shields.io/badge/Revved%20up%20by-Gradle%20Enterprise-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.spring.io/scans?search.rootProjectNames=spring)
+# 读尽天下源码，心中自然无码
 
-This is the home of the Spring Framework: the foundation for all [Spring projects](https://spring.io/projects). Collectively the Spring Framework and the family of Spring projects are often referred to simply as "Spring". 
+:star: 针对最新的5.3.23版本的Spring框架文档
+## 主要模块
+### Overview 概述
 
-Spring provides everything required beyond the Java programming language for creating enterprise applications for a wide range of scenarios and architectures. Please read the [Overview](https://docs.spring.io/spring/docs/current/spring-framework-reference/overview.html#spring-introduction) section as reference for a more complete introduction.
+history, design philosophy, feedback, getting started.
 
-## Code of Conduct
+发展历史，设计理念，反馈，起步
 
-This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc). By participating, you are expected to uphold this code of conduct. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+### Core 核心
 
-## Access to Binaries
+IoC Container, Events, Resources, i18n, Validation, Data Binding, Type Conversion, SpEL, AOP.
 
-For access to artifacts or a distribution zip, see the [Spring Framework Artifacts](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Artifacts) wiki page.
+Ioc 容器，事件，资源，国际化，校验，数据绑定，类型转换，Spring表达式（Spring Expression Language）,切面编程
 
-## Documentation
+### Testing 测试
+Mock Objects, TestContext Framework, Spring MVC Test, WebTestClient.
 
-The Spring Framework maintains reference documentation ([published](https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/) and [source](src/docs/asciidoc)), GitHub [wiki pages](https://github.com/spring-projects/spring-framework/wiki), and an
-[API reference](https://docs.spring.io/spring-framework/docs/current/javadoc-api/). There are also [guides and tutorials](https://spring.io/guides) across Spring projects.
+### Data Access
+Transactions, DAO Support, JDBC, R2DBC, O/R Mapping, XML Marshalling.
 
-## Micro-Benchmarks
+### Web Servlet
+Spring MVC, WebSocket, SockJS, STOMP Messaging.
 
-See the [Micro-Benchmarks](https://github.com/spring-projects/spring-framework/wiki/Micro-Benchmarks) wiki page.
+### Web Reactive
+Spring WebFlux, WebClient, WebSocket, RSocket.
 
-## Build from Source
+### Integration
+Remoting, JMS, JCA, JMX, Email, Tasks, Scheduling, Caching.
 
-See the [Build from Source](https://github.com/spring-projects/spring-framework/wiki/Build-from-Source) wiki page and the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+### Languages
+Kotlin, Groovy, Dynamic Languages.
 
-## Continuous Integration Builds
+支持多种其他语言
 
-Information regarding CI builds can be found in the [Spring Framework Concourse pipeline](ci/README.adoc) documentation.
+### Appendix
+Spring properties.
 
-## Stay in Touch
+### Wiki
+What’s New, Upgrade Notes, Supported Versions, and other cross-version information.
 
-Follow [@SpringCentral](https://twitter.com/springcentral), [@SpringFramework](https://twitter.com/springframework), and its [team members](https://twitter.com/springframework/lists/team/members) on Twitter. In-depth articles can be found at [The Spring Blog](https://spring.io/blog/), and releases are announced via our [news feed](https://spring.io/blog/category/news).
+## 开始
+根据官方文档中
 
-## License
+The Spring Framework is divided into modules. Applications can choose which modules they need. At the heart are the modules of the core container, including a configuration model and a dependency injection mechanism.
 
-The Spring Framework is released under version 2.0 of the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
+Spring框架分为多个模块。应用程序可以选择所需的模块。核心是核心容器的模块，包括配置模型和依赖注入机制。
+
+而在Spring框架核心中，IOC控制反转容器最重要。
+
+Foremost amongst these is the Spring Framework’s Inversion of Control (IoC) container. A thorough treatment of the Spring Framework’s IoC container is closely followed by comprehensive coverage of Spring’s Aspect-Oriented Programming (AOP) technologies. 
+
+**The org.springframework.beans and org.springframework.context packages are the basis for Spring Framework’s IoC container.** 
+The BeanFactory interface provides an advanced configuration mechanism capable of managing any type of object. ApplicationContext is a sub-interface of BeanFactory. It adds:
+
+- Easier integration with Spring’s AOP features
+
+- Message resource handling (for use in internationalization)
+
+- Event publication
+
+- Application-layer specific contexts such as the WebApplicationContext for use in web applications.
+
+而在org.springframework.beans和org.springframework.context包是Spring框架IoC容器的基础。
+
+## IOC 控制反转
+### 体验
+:star:体验一下IOC容器控制反转
+前提: 把Spring源码clone下来。(也可以使用我仓库的代码调试)
+如果编译报错：
+无效发行版本：xx,请把JDK升级为17版本
+
+#### ① 方式一：配置文件注入
+
+Config.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean class="base.SimpleBean"></bean>
+</beans>
+```
+
+SimpleBean.java
+
+```java
+// 需要被控制反转的类
+public class SimpleBean {
+
+	public void awkwardSmile(){
+		System.out.println("I definitely love coding!");
+	}
+}
+```
+
+Main.java
+
+```java
+public class GetStart {
+
+	public static void main(String[] args) {
+		byConfigFile();
+	}
+	public static void byConfigFile() {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("config.xml");
+		SimpleBean bean = context.getBean(SimpleBean.class);
+		bean.awkwardSmile();
+		context.close();
+	}
+}
+```
+
+
+
+#### ② 方式二：配置文件注入
+
+AnnotationSimpleBean.java
+
+```java
+// 需要被控制反转的类
+public class AnnotationSimpleBean {
+
+	private String name;
+
+	private String email;
+
+	public AnnotationSimpleBean(String name, String email) {
+		this.name = name;
+		this.email = email;
+	}
+
+	public void introduce(){
+		System.out.println(String.format("Here is %s, my email is %s. Welcome to send me an office!",this.name,this.email));
+	}
+
+}
+```
+
+SimpleBeanConfig.java
+
+```java
+@Configuration
+public class SimpleBeanConfig {
+
+	@Bean
+	public AnnotationSimpleBean annotationBean(){
+		return new AnnotationSimpleBean("Xander chow","zhrunxin33@gmail.com");
+	}
+}
+```
+
+执行器入口Main.java
+
+```java
+public static void byAnnotationConfig() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SimpleBeanConfig.class);
+		AnnotationSimpleBean bean = context.getBean(AnnotationSimpleBean.class);
+		bean.introduce();
+		context.close();
+	}
+```
+
+可以看到我们创建对象的时候，就不需要使用new xx()。绝大多数时候，我们只需要用到单例，这就意味着我们每个类都需要写单例模式。当对象创建销毁交给Spring容器管理，我们就可以不用考虑（默认是单例模式）。
+
+
+
+### 继承关系
+
+光标停留在**ClassPathXmlApplicationContext**和**AnnotationConfigApplicationContext**上，使用快捷键Ctrl+Alt+U查看继承图。
+
+
+
+**1.ClassPathXmlApplicationContext**
+
+![image-20221019183239926](spring-analysis/doc/images/image-20221019183239926.png)
+
+
+
+**2.AnnotationConfigApplicationContext**
+
+![image-20221019183353840](spring-analysis/doc/images/image-20221019183353840.png)
+
+可知BeanFactory是IOC容器功能的根接口。
+
+我们不要害怕阅读，双击左上角的BeanFactory接口。可以看到这个类定义了哪些行为（接口）
+
+![image-20221020162959049](spring-analysis/doc/images/image-20221020162959049.png)
+
+看得到，这里定义了一系列获取Bean实例的方法，并且定义了判断容器是否包含该bean，是否单例或多例模式。
+
+这样，每个接口粗略看看（不用死记的）
+
+- `Beanfactory`: 获取Bean实例的方法，并且定义了判断容器是否包含该bean，是否单例或多例模式.
+- `applicationContext`: 应用上下文核心接口， 各类上下文实现类都是它的实现类
