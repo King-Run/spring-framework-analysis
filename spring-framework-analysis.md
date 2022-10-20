@@ -176,7 +176,7 @@ public static void byAnnotationConfig() {
 
 **1.ClassPathXmlApplicationContext**
 
-![image-20221019183239926](spring-analysis\doc\images\image-20221019183239926.png)
+![image-20221019183239926](spring-analysis/doc/images/image-20221019183239926.png)
 
 
 
