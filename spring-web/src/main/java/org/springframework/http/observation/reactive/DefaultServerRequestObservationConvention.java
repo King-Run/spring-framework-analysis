@@ -50,7 +50,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	private static final KeyValue URI_REDIRECTION = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, "REDIRECTION");
 
-	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, "none");
+	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
 
 	private static final KeyValue HTTP_URL_UNKNOWN = KeyValue.of(ServerHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, "UNKNOWN");
 
@@ -110,7 +110,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 				if (pattern.toString().isEmpty()) {
 					return URI_ROOT;
 				}
-				return KeyValue.of("uri", pattern.toString());
+				return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, pattern.toString());
 			}
 			if (context.getResponse() != null) {
 				HttpStatus status = HttpStatus.resolve(context.getResponse().getStatusCode().value());
@@ -149,8 +149,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	protected KeyValue httpUrl(ServerRequestObservationContext context) {
 		if (context.getCarrier() != null) {
-			String uriExpanded = context.getCarrier().getPath().toString();
-			return KeyValue.of(ServerHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, uriExpanded);
+			return KeyValue.of(ServerHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getPath().toString());
 		}
 		return HTTP_URL_UNKNOWN;
 	}
@@ -161,8 +160,8 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 			if (statusCode.is2xxSuccessful()) {
 				return HTTP_OUTCOME_SUCCESS;
 			}
-			else if (statusCode instanceof HttpStatus status){
-				return KeyValue.of("outcome", status.series().name());
+			else if (statusCode instanceof HttpStatus status) {
+				return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, status.series().name());
 			}
 			else {
 				return HTTP_OUTCOME_UNKNOWN;
