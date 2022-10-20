@@ -176,23 +176,23 @@ public static void byAnnotationConfig() {
 
 **1.ClassPathXmlApplicationContext**
 
-![image-20221019183239926](L:\Every Day\image\image-20221019183239926.png)
+![image-20221019183239926](.\spring-analysis\doc\images\image-20221019183239926.png)
 
 
 
 **2.AnnotationConfigApplicationContext**
 
-![image-20221019183353840](L:\Every Day\image\image-20221019183353840.png)
+![image-20221019183353840](.\spring-analysis\doc\images\image-20221019183353840.png)
 
 可知BeanFactory是IOC容器功能的根接口。
 
 我们不要害怕阅读，双击左上角的BeanFactory接口。可以看到这个类定义了哪些行为（接口）
 
-![image-20221020162959049](L:\Every Day\image\image-20221020162959049.png)
+![image-20221020162959049](.\spring-analysis\doc\images\image-20221020162959049.png)
 
 看得到，这里定义了一系列获取Bean实例的方法，并且定义了判断容器是否包含该bean，是否单例或多例模式。
 
 这样，每个接口粗略看看（不用死记的）
 
 - `Beanfactory`: 获取Bean实例的方法，并且定义了判断容器是否包含该bean，是否单例或多例模式.
-- `s`:
+- `applicationContext`: 应用上下文核心接口， 各类上下文实现类都是它的实现类
