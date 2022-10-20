@@ -164,3 +164,24 @@ public static void byAnnotationConfig() {
 	}
 ```
 
+可以看到我们创建对象的时候，就不需要使用new xx()。绝大多数时候，我们只需要用到单例，这就意味着我们每个类都需要写单例模式。当对象创建销毁交给Spring容器管理，我们就可以不用考虑（默认是单例模式）。
+
+
+
+### 继承关系
+
+光标停留在**ClassPathXmlApplicationContext**和**AnnotationConfigApplicationContext**上，使用快捷键Ctrl+Alt+U查看继承图。
+
+
+
+**1.ClassPathXmlApplicationContext**
+
+![image-20221019183239926](L:\Every Day\image\image-20221019183239926.png)
+
+
+
+**2.AnnotationConfigApplicationContext**
+
+![image-20221019183353840](L:\Every Day\image\image-20221019183353840.png)
+
+可知BeanFactory是IOC容器功能的根接口。
