@@ -253,7 +253,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 
 
 
-**setConfigLocations**
+#### **setConfigLocations**
 
 setConfigLocations方法的主要工作有两个：创建环境对象ConfigurableEnvironment和处理ClassPathXmlApplicationContext传入的字符串中的占位符
 
@@ -279,7 +279,8 @@ setConfigLocations方法的主要工作有两个：创建环境对象Configurabl
 ```
 
 这里getEnironment()就涉及到了创建环境变量相关的操作了
-获取环境变量
+
+##### 1.获取环境变量
 
 ```java
 	@Override
@@ -301,6 +302,87 @@ setConfigLocations方法的主要工作有两个：创建环境对象Configurabl
 		Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
 		systemEnvironment.forEach((k,v)->System.out.println(k+":"+v));
 		context.close();
+	}
+```
+
+
+接着看`createEnvironment()`方法，发现它返回了一个`StandardEnvironment`类，而这个类中的`customizePropertySources`方法就会往资源列表中添加Java进程中的变量和系统的环境变量
+
+```java
+protected void customizePropertySources(MutablePropertySources propertySources) {
+		propertySources.addLast(
+				new PropertiesPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));
+		propertySources.addLast(
+				new SystemEnvironmentPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));
+	}
+```
+
+##### 2.处理占位符
+
+再次回到 `resolvePath`方法后跟进通过上方获取的`ConfigurableEnvironment`接口的`resolveRequiredPlaceholders`方法，终点就是下方的这个方法。这个方法主要就是处理所有使用${}方式的占位符
+
+```java
+	protected String parseStringValue(
+			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
+
+		int startIndex = value.indexOf(this.placeholderPrefix);
+		if (startIndex == -1) {
+			return value;
+		}
+
+		StringBuilder result = new StringBuilder(value);
+		while (startIndex != -1) {
+			int endIndex = findPlaceholderEndIndex(result, startIndex);
+			if (endIndex != -1) {
+				String placeholder = result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
+				String originalPlaceholder = placeholder;
+				if (visitedPlaceholders == null) {
+					visitedPlaceholders = new HashSet<>(4);
+				}
+				if (!visitedPlaceholders.add(originalPlaceholder)) {
+					throw new IllegalArgumentException(
+							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
+				}
+				// Recursive invocation, parsing placeholders contained in the placeholder key.
+				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
+				// Now obtain the value for the fully resolved key...
+				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
+				if (propVal == null && this.valueSeparator != null) {
+					int separatorIndex = placeholder.indexOf(this.valueSeparator);
+					if (separatorIndex != -1) {
+						String actualPlaceholder = placeholder.substring(0, separatorIndex);
+						String defaultValue = placeholder.substring(separatorIndex + this.valueSeparator.length());
+						propVal = placeholderResolver.resolvePlaceholder(actualPlaceholder);
+						if (propVal == null) {
+							propVal = defaultValue;
+						}
+					}
+				}
+				if (propVal != null) {
+					// Recursive invocation, parsing placeholders contained in the
+					// previously resolved placeholder value.
+					propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
+					result.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Resolved placeholder '" + placeholder + "'");
+					}
+					startIndex = result.indexOf(this.placeholderPrefix, startIndex + propVal.length());
+				}
+				else if (this.ignoreUnresolvablePlaceholders) {
+					// Proceed with unprocessed value.
+					startIndex = result.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
+				}
+				else {
+					throw new IllegalArgumentException("Could not resolve placeholder '" +
+							placeholder + "'" + " in value \"" + value + "\"");
+				}
+				visitedPlaceholders.remove(originalPlaceholder);
+			}
+			else {
+				startIndex = -1;
+			}
+		}
+		return result.toString();
 	}
 ```
 
