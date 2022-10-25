@@ -65,7 +65,7 @@ The BeanFactory interface provides an advanced configuration mechanism capable o
 而在org.springframework.beans和org.springframework.context包是Spring框架IoC容器的基础。
 
 ## IOC 控制反转
-### 体验
+### 一、体验
 :star:体验一下IOC容器控制反转
 前提: 把Spring源码clone下来。(也可以使用我仓库的代码调试)
 如果编译报错：
@@ -168,7 +168,7 @@ public static void byAnnotationConfig() {
 
 
 
-### 继承关系
+### 二、继承关系
 
 光标停留在**ClassPathXmlApplicationContext**和**AnnotationConfigApplicationContext**上，使用快捷键Ctrl+Alt+U查看继承图。
 
@@ -196,3 +196,111 @@ public static void byAnnotationConfig() {
 
 - `Beanfactory`: 获取Bean实例的方法，并且定义了判断容器是否包含该bean，是否单例或多例模式.
 - `applicationContext`: 应用上下文核心接口， 各类上下文实现类都是它的实现类
+- `ListableBeanFactory`: 提供一系列查询Bean的方法，以及查询Bean的配置
+- `HierarchicalBeanFactory`: 在 `BeanFactory`基础上提供了关于父 BeanFactory 的支持
+- `EnvironmentCapable`: 提供了获取环境配置的方法
+- `ApplicationEventPublisher`: 提供事件通知接口，上下文开始创建，停止等操作都会产生事件通知。
+- `ResourceLoader`: 定义了获取资源加载的方式
+
+这些接口笔者对其进行了简单的分类. (各位读者如果有新的分类也可以进行补充)
+
+- 第一类是关于资源处理， 比如 `Resource` 、`ResourceLoader`
+- 第二类是关于注册形式， 在 Spring 中关于注册的几个核心就是 alias(`AliasRegistry`) 、Bean 定义注册(`BeanDefinitionRegistry`) 、单例Bean注册(`SingletonBeanRegistry`)
+- 第三类是关于生命周期的， 生命周期又可以分为两类，
+  - 第一类是容器的生命周期， 容器生命周期的核心接口: `Lifecycle`
+  - 第二类是Bean的生命周期， Bean 生命周期的接口有: `InitializingBean`、`DisposableBean`
+- 第四类是关于Bean拓展的， 如: `BeanPostProcessor`、`Aware` 系列接口
+- 第五类是关于上下文的接口主要以: `ApplicationContext` 作为主导接口
+- 第六类是读取接口主要用来读取信息，如: `BeanDefinitionReader` . 这也可以归到资源处理中， 笔者在这里还是将其提取出来做一个单独的大类
+
+:star: 记住类继承图是看到整个代码设计脉络很重要的手段。`Cril+Alt+U`
+
+
+
+### 三、核心上下文解析
+
+再来看看**ClassPathXmlApplicationContext**类
+
+```java
+public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
+
+	@Nullable
+	private Resource[] configResources;
+	// 调用父容器
+    public ClassPathXmlApplicationContext(ApplicationContext parent) {
+    	super(parent);
+  	}
+    
+    public ClassPathXmlApplicationContext(
+			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)
+			throws BeansException {
+
+		super(parent);
+		setConfigLocations(configLocations);
+		if (refresh) {
+			refresh();
+		}
+	}
+
+}
+```
+
+可以看到这个类很简单，基本上都是构造方法。
+
+我们使用`new ClassPathXmlApplicationContext("config.xml")`调用的就是这个方法。
+
+可以看到整体来看源码比较简单，只有setConfigLocations和refresh两个方法没有看到具体的实现。但是如果你因为这个而小巧了Spring那可就大错特错了，setConfigLocations只是一个开胃小菜，refresh才是我们本文的重点
+
+
+
+**setConfigLocations**
+
+setConfigLocations方法的主要工作有两个：创建环境对象ConfigurableEnvironment和处理ClassPathXmlApplicationContext传入的字符串中的占位符
+
+跟着setConfigLocations方法一直往下走
+
+```java
+	public void setConfigLocations(@Nullable String... locations) {
+		if (locations != null) {
+			Assert.noNullElements(locations, "Config locations must not be null");
+			this.configLocations = new String[locations.length];
+			for (int i = 0; i < locations.length; i++) {
+				this.configLocations[i] = resolvePath(locations[i]).trim();
+			}
+		}
+		else {
+			this.configLocations = null;
+		}
+	}
+
+	protected String resolvePath(String path) {
+		return getEnvironment().resolveRequiredPlaceholders(path);
+	}
+```
+
+这里getEnironment()就涉及到了创建环境变量相关的操作了
+获取环境变量
+
+```java
+	@Override
+	public ConfigurableEnvironment getEnvironment() {
+		if (this.environment == null) {
+			this.environment = createEnvironment();
+		}
+		return this.environment;
+	}
+```
+
+实际上创建了一个标准环境对象，可以通过输出来看看
+
+```java
+	@Test
+	public void printSystemEnvironment(){
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("config.xml");
+		ConfigurableEnvironment environment = context.getEnvironment();
+		Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
+		systemEnvironment.forEach((k,v)->System.out.println(k+":"+v));
+		context.close();
+	}
+```
+

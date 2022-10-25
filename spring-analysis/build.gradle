@@ -7,10 +7,16 @@ dependencies {
     api(project(":spring-beans"))
     api(project(":spring-context"))
     api(project(":spring-core"))
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    testImplementation(testFixtures(project(":spring-beans")))
+    implementation 'org.testng:testng:7.1.0'
+    optional("jakarta.inject:jakarta.inject-api")
+    optional("org.yaml:snakeyaml")
+    optional("org.apache.groovy:groovy-xml")
+    optional("org.jetbrains.kotlin:kotlin-reflect")
+    optional("org.jetbrains.kotlin:kotlin-stdlib")
     testImplementation(testFixtures(project(":spring-core")))
-    testImplementation(testFixtures(project(":spring-context")))
-    testImplementation(testFixtures(project(":spring-web")))
+    testImplementation(project(":spring-core-test"))
+    testImplementation("jakarta.annotation:jakarta.annotation-api")
+    testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+    testFixturesImplementation("org.assertj:assertj-core")
+    testFixturesImplementation("org.assertj:assertj-core")
 }

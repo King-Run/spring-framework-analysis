@@ -3,6 +3,10 @@ import base.SimpleBean;
 import base.SimpleBeanConfig;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.testng.annotations.Test;
+
+import java.util.Map;
 
 /**
  * @Author RunXin
@@ -27,6 +31,15 @@ public class GetStart {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SimpleBeanConfig.class);
 		AnnotationSimpleBean bean = context.getBean(AnnotationSimpleBean.class);
 		bean.introduce();
+		context.close();
+	}
+
+	@Test
+	public void printSystemEnvironment(){
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("config.xml");
+		ConfigurableEnvironment environment = context.getEnvironment();
+		Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
+		systemEnvironment.forEach((k,v)->System.out.println(k+":"+v));
 		context.close();
 	}
 
